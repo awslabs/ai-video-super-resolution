@@ -1,0 +1,88 @@
+Metadata-Version: 2.1
+Name: cdk
+Version: 0.0.1
+Summary: An empty CDK Python app
+Home-page: UNKNOWN
+Author: author
+License: UNKNOWN
+Description: 
+        # AI Video Resolution Enhancement
+        
+        Upscale video resolution quality with advanced AI algorithms
+        
+        The process of reconstructing high-resolution video from low-resolution video is called super-resolution reconstruction. Recent state-of-the-art super-resolution methods have achieved impressive performance on ideal datasets. However, these methods always fail in real-world video super-resolution, since most of them ignore the blurring and noise that exists in the real world (such as video compression). Together with scientists from the GluonCV team, we developed a deep learning based super-resolution approach named GDAVSR. This approach can bring better visual quality. Based on this method, we can help customers improve the resolution of videos at a low cost.
+        
+        ![homepage](homepage.png)
+        
+        ## Architecture diagram
+        ![architecture diagram](arch.png)
+        
+        ## Usage
+        
+        ### Prerequisites
+        - An AWS account
+        - Python installed, such as 3.6
+        - Install dependencies of app  
+        - Build lambda layer 
+        
+        ```
+        pip install -r requirements.txt
+        cd layers
+        chmod +x build_layer.sh
+        ./build_layer.sh
+        cd ..
+        ```
+        
+        - Modify the Dockerfile file under "assets/compute-task"
+        
+        `763104351884.dkr.ecr.<region>.amazonaws.com/pytorch-inference-neuron:1.7.1-neuron-py36-ubuntu18.04`
+        
+        
+        #### CDK Synth & CDK Deploy
+        ```
+        cdk synth
+        cdk deploy --parameters MaxvCpus=<max cpu> --parameters InferImage=<image address> --parameters InstanceTypes=<ec2 instance types> 
+        ```
+        MaxvCpus:default: 32
+        
+        InferImage: Docker image of inference model. (eg, 119067974288.dkr.ecr.us-west-2.amazonaws.com/vsr:beta)
+        
+        InstanceTypes: ec2 instance types, a comma-separated list. Default: g4dn.xlarge
+        
+        
+        ### How to use
+        1. Upload low-resolution video to S3 bucket('vsr-superresolutions*')
+        1. call API Gateway
+        ```
+        {
+        "key": "video_file",
+        "method": "BSR",
+        "alpha": "0.5",
+        "scale": "4",
+        "task": "audio",
+        "env": "spot"
+        }
+        ```
+            - key: filename in s3 bucket
+            - method['GDAVSR', 'ESR', 'BSR', 'GDAVSR+ESR', 'GDAVSR+BSR']: the solution has three super-resolution methods: `GDAVSR`, `ESR` and `BSR`.
+            - alpha: only for 'GDAVSR+ESR' and 'GDAVSR+BSR'. Float number between 0 and 1, which is used to adjust the style of the output. When alpha is close to 1, the style is more realistic, and when alpha is close to 0, the texture is clearer (it will bring fictional texture)
+            - scale['2', '4']: Scale for super resolution.
+            - task[audio, woaudio]: whether to keep the original audio. Note that when there is no audio in the original video, be sure to select `woaudio`
+            - env[onDemand, spot]: which the type of machine to be used
+        
+        1. Wait for Batch processing..
+        1. Download high-resolution video from S3 bucket('vsr-superresolutions*')
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: JavaScript
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Software Development :: Code Generators
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

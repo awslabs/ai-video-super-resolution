@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+
+  pre_build:
+    commands:
+      - pip install -r requirements.txt
+      - pip install cdk-bootstrapless-synthesizer
+  build:
+    commands:
+      - cd layers
+      - chmod +x build_layer.sh
+      - ./build_layer.sh
+      - ls -l
+      - cd ../deployment
+      - ./build-s3-dist.sh ${DIST_OUTPUT_BUCKET} ${SOLUTION_NAME} ${VERSION}
+  post_build:
+    commands:
+      - aws s3 cp s3://solutions-build-assets/changelog-spec.yml buildspec.yml || true
+artifacts:
+  files:
+    - .git/**/*
+    - layers/**/*
+    - deployment/**/*
+    - buildspec.yml
+    - CHANGELOG.md
+    - .cfnnagignore

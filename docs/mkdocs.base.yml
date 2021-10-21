@@ -1,0 +1,16 @@
+site_name: AI Super Resolution
+site_url: 'https://awslabs.github.io/realtime-fraud-detection-with-gnn-on-dgl/'
+repo_url: 'https://github.com/awslabs/realtime-fraud-detection-with-gnn-on-dgl'
+theme:
+  name: material
+  features:
+    - tabs
+    - search.suggest
+    - search.highlight
+plugins:
+  - search
+extra:
+  alternate:
+    - name: 简体中文
+      link: /ai-super-resolution/zh/
+      lang: zh-CN
