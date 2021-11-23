@@ -49,8 +49,8 @@ class SuperResolutionStack(core.Stack):
         core.CfnCondition(self, 'IsChinaRegionCondition', expression = core.Fn.condition_equals(core.Aws.PARTITION, 'aws-cn'))
         imageUrl = core.Fn.condition_if(
                 'IsChinaRegionCondition',
-                f'753680513547.dkr.ecr.cn-north-1.amazonaws.com.cn/ai-video-super-resolution-inf1:latest',
-                f'366590864501.dkr.ecr.us-west-2.amazonaws.com/ai-video-super-resolution-inf1:latest'
+                f'753680513547.dkr.ecr.cn-north-1.amazonaws.com.cn/ai-video-super-resolution-inf1:v2.0.0',
+                f'366590864501.dkr.ecr.us-west-2.amazonaws.com/ai-video-super-resolution-inf1:v2.0.0'
             )
         if enableInferentia:
             instanceTypes = 'inf1.xlarge'
@@ -154,7 +154,8 @@ class SuperResolutionStack(core.Stack):
                 'PARALLEL_GROUPS': '2',
                 'EFS_PATH': EFS_PATH,
                 'user_agent_extra': "AwsSolution/SO8009/v1.0.0",
-                'S3_BUCKET': s3.bucket_name
+                'S3_BUCKET': s3.bucket_name,
+                'instance_types': instanceTypes
             },
             runtime=_lambda.Runtime.PYTHON_3_8,
             tracing = _lambda.Tracing.ACTIVE,
@@ -172,25 +173,6 @@ class SuperResolutionStack(core.Stack):
             #eploy_options=apigw.StageOptions(access_log_destination)
         )
         s3.grant_read(my_lambda)
-
-        # Batch launch template (to mount efs)
-        mime_wrapper = ec2.UserData.custom('MIME-Version: 1.0')
-        mime_wrapper.add_commands('Content-Type: multipart/mixed; boundary="==BOUNDARY=="')
-        mime_wrapper.add_commands('')
-        mime_wrapper.add_commands('--==BOUNDARY==')
-        mime_wrapper.add_commands('Content-Type: text/x-shellscript; charset="us-ascii"')
-        mime_wrapper.add_commands('')
-        mime_wrapper.add_commands( "yum install -y amazon-efs-utils",
-                                "yum install -y nfs-utils",
-                                "file_system_id=" + filesystem.file_system_id,
-                                "access_point_id=" + efs_ap.access_point_id,
-                                "efs_mount_point=/mnt/efs/",
-                                "mkdir -p \"${efs_mount_point}\"",
-                                "echo \"${file_system_id} ${efs_mount_point} efs _netdev,tls,iam,accesspoint=${access_point_id} 0 0\" >> /etc/fstab",
-                                "mount -a -t efs,nfs4 defaults",
-                                '',
-                                '--==BOUNDARY==--'
-                                )
 
         # IAM
         batchServiceRole = iam.Role(self, 'BatchServiceRole', assumed_by = iam.CompositePrincipal(iam.ServicePrincipal('batch.amazonaws.com')),
@@ -232,8 +214,6 @@ class SuperResolutionStack(core.Stack):
                                            volume = ec2.BlockDeviceVolume.ebs(200, encrypted=True))
             ],
             detailed_monitoring = True,
-            user_data = mime_wrapper,
-            #user_data = core.Fn.base64(mime_wrapper.render())
             launch_template_name = 'SuperResolution_template'
         )
 
@@ -286,7 +266,6 @@ class SuperResolutionStack(core.Stack):
             priority = 10
         )
 
-
         # Job Definition
         batch.CfnJobDefinition(self, 'ComputingBatch',
             type =  'container',
@@ -298,17 +277,16 @@ class SuperResolutionStack(core.Stack):
                     'Ref::File',
                     '-s',
                     'Ref::Scale',
+                    '-t',
+                    'Ref::SegmentTime',
                     '--task',
                     'Ref::TaskFlag'
                 ],
                 job_role_arn = jobRole.role_arn,
                 linux_parameters = linux_parameters,
-                volumes = [{
-                    "host": {
-                        "sourcePath": "/mnt/efs"
-                    },
-                    "name": "efs"
-                }],
+                volumes = [batch.CfnJobDefinition.VolumesProperty(
+                    efs_volume_configuration=batch.CfnJobDefinition.EfsVolumeConfigurationProperty(file_system_id=filesystem.file_system_id),
+                    name='efs')],
                 environment= [
                     {
                         'name': 'S3_BUCKET',
