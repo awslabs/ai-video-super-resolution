@@ -1,12 +1,14 @@
-site_name: AI Super Resolution
-site_url: 'https://awslabs.github.io/realtime-fraud-detection-with-gnn-on-dgl/'
-repo_url: 'https://github.com/awslabs/realtime-fraud-detection-with-gnn-on-dgl'
+site_name: AI Video Super Resolution
+site_url: 'https://www.amazonaws.cn/solutions/ai-super-resolution-on-aws/'
+repo_url: 'https://github.com/aws-samples/ai-video-super-resolution'
 theme:
   name: material
   features:
     - tabs
     - search.suggest
     - search.highlight
+markdown_extensions:
+  - admonition 
 plugins:
   - search
 extra:

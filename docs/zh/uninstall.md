@@ -1,6 +1,8 @@
-要卸载**AI视频超分辨率重建解决方案**，请删除CloudFormation堆栈。这将删除模板创建时的所有资源，但`superresolutionstack-superresolutionstorage`开头命名的S3存储桶和`superresolutionstack-superresolutionbucketaccessl`开头命名的存储桶除外。删除堆栈时将保留这两个存储桶，从而避免意外丢失数据。
+要卸载**AI视频超分辨率解决方案**，请删除CloudFormation堆栈。您可以使用亚马逊云科技管理控制台或CLI删除CloudFormation堆栈。
 
-您可以使用亚马逊云科技管理控制台或CLI删除CloudFormation堆栈，然后删除S3存储桶。
+!!! warning "重要提示"
+    
+    删除堆栈时将保留`superresolutionstack-superresolutionstorage`和`superresolutionstack-superresolutionbucketaccessl`开头命名的存储桶。要成功删除堆栈，请提前清空这两个存储桶。
 
 ## 使用亚马逊云科技管理控制台删除堆栈
 

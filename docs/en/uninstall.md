@@ -1,8 +1,12 @@
-To uninstall the **AI Video Super Resolution** solution, you must delete the AWS CloudFormation stack. This will delete all the resources created by the template except the S3 buckets starting with `superresolutionstack-superresolutionstorage` and `superresolutionstack-superresolutionbucketaccessl`. These two buckets will be retained when the solution stack is deleted in order to help prevent accidental data loss. 
-You can use either the AWS Management Console or the AWS Command Line Interface (AWS CLI) to delete the CloudFormation stack, then manually delete those S3 buckets.
+To uninstall the **AI Video Super Resolution** solution, you must delete the AWS CloudFormation stack. You can use the AWS Management Console or the AWS Command Line Interface (AWS CLI) to delete the CloudFormation stack.
+
+
+!!! warning "Important"
+    
+    Because two S3 buckets starting with `superresolutionstack-superresolutionstorage` and `superresolutionstack-superresolutionbucketaccessl` will persist while you delete the stack, make sure to empty the two buckets before deleting the AWS CloudFormation stack.
+
 
 ## Uninstall the stack using the AWS Management Console
-
 1. Sign in to the [AWS CloudFormation][cloudformation-console] console.
 1. Select this solution’s installation parent stack.
 1. Choose **Delete**.
@@ -17,7 +21,7 @@ aws cloudformation delete-stack --stack-name <installation-stack-name> --region 
 
 ## Deleting the Amazon S3 buckets
 
-The solution creates two S3 buckets that are not automatically deleted. To delete these buckets, use the steps below.
+The solution creates two S3 buckets that are not automatically deleted. You can choose to follow the following steps to delete these buckets manually.
 
 1. Sign in to the [Amazon S3][s3-console] console.
 1. Select the bucket name starting with `superresolutionstack-superresolutionstorage`.

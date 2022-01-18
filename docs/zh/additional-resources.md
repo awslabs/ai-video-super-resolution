@@ -1,9 +1,9 @@
 - [Amazon API Gateway][api-gateway]
-- [Amazon Lambda][lambda]
-- [Amazon Batch][Batch]
+- [AWS Lambda][lambda]
+- [AWS Batch][Batch]
 - [Amazon S3][s3]
 - [Amazon EFS][efs]
-- [Amazon EC2 Inf1][inf1]
+- [Amazon EC2 Inf1 Instances][inf1]
 
 
 [api-gateway]: https://aws.amazon.com/cn/api-gateway/
