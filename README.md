@@ -57,4 +57,3 @@ MaxvCpus:default: 16
 
 1. Wait for Batch processing..
 1. Download high-resolution video from S3 bucket('superresolutions*')
-
