@@ -14,8 +14,8 @@ plugins:
 extra:
   alternate:
     - name: 简体中文
-      link: /ai-super-resolution/zh/
+      link: /ai-super-video-resolution/zh/
       lang: zh
     - name: English
-      link: /ai-super-resolution/en/
+      link: /ai-super-video-resolution/en/
       lang: en
