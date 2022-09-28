@@ -15,7 +15,7 @@ EFS_PATH = '/mnt/efs'
 
 class SuperResolutionStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: core.Construct, construct_id: str, enableInferentia: bool, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         stack = core.Stack.of(self)
         self.template_options.description = '(SO8009) AI Video Super Resolution. Template version v2.0.0'
@@ -35,11 +35,11 @@ class SuperResolutionStack(core.Stack):
         )
 
         # context
-        enableInferentia = self.node.try_get_context('inferentia')
-        if enableInferentia is None or enableInferentia[:1]=='t':
-            enableInferentia = True
-        else:
-            enableInferentia=False
+        # enableInferentia = self.node.try_get_context('inferentia')
+        # if enableInferentia is None or enableInferentia[:1]=='t':
+        #     enableInferentia = True
+        # else:
+        #     enableInferentia=False
         maxv_cpus_parameter = core.CfnParameter(self, 'MaxvCpus',
             type = 'Number',
             min_value=0,
@@ -47,16 +47,17 @@ class SuperResolutionStack(core.Stack):
         )
         
         core.CfnCondition(self, 'IsChinaRegionCondition', expression = core.Fn.condition_equals(core.Aws.PARTITION, 'aws-cn'))
-        imageUrl = core.Fn.condition_if(
-                'IsChinaRegionCondition',
-                f'753680513547.dkr.ecr.cn-north-1.amazonaws.com.cn/ai-video-super-resolution-inf1:v2.0.0',
-                f'366590864501.dkr.ecr.us-west-2.amazonaws.com/ai-video-super-resolution-inf1:v2.0.0'
-            )
+        
         if enableInferentia:
             instanceTypes = 'inf1.xlarge'
             ami_id = ec2.MachineImage.from_ssm_parameter('/aws/service/ecs/optimized-ami/amazon-linux-2/inf/recommended/image_id', ec2.OperatingSystemType.LINUX)
+            imageUrl = core.Fn.condition_if(
+                'IsChinaRegionCondition',
+                f'753680513547.dkr.ecr.cn-north-1.amazonaws.com.cn/ai-video-super-resolution-inf1:v2.2.0',
+                f'366590864501.dkr.ecr.us-west-2.amazonaws.com/ai-video-super-resolution-inf1:v2.2.0'
+            )
             #Pre-build docker image
-            compute_image = imageUrl.to_string()
+            
             linux_parameters = {
                                     "devices": [
                                         {
@@ -70,14 +71,17 @@ class SuperResolutionStack(core.Stack):
                                     ]
                                 }
         else:
-            infer_image_parameter = core.CfnParameter(self, 'GPUInferImage',
-                type = 'String',
-                default = ''
-            )
             instanceTypes = 'g4dn.xlarge'
             ami_id = ec2.MachineImage.from_ssm_parameter('/aws/service/ecs/optimized-ami/amazon-linux-2/gpu/recommended/image_id', ec2.OperatingSystemType.LINUX)
-            compute_image = infer_image_parameter.value_as_string
+            imageUrl = core.Fn.condition_if(
+                'IsChinaRegionCondition',
+                f'753680513547.dkr.ecr.cn-north-1.amazonaws.com.cn/ai-video-super-resolution-gpu:v2.2.0',
+                f'366590864501.dkr.ecr.us-west-2.amazonaws.com/ai-video-super-resolution-gpu:v2.2.0'
+            )
+            #Pre-build docker image
             linux_parameters = None
+        compute_image = imageUrl.to_string()
+
         # create vpc
         vpc = ec2.Vpc(self, "SuperResolutionVPC",
             max_azs = 2,
@@ -282,10 +286,11 @@ class SuperResolutionStack(core.Stack):
                     '--task',
                     'Ref::TaskFlag'
                 ],
+                resource_requirements = None if enableInferentia else [batch.CfnJobDefinition.ResourceRequirementProperty(type='GPU', value='1')],
                 job_role_arn = jobRole.role_arn,
                 linux_parameters = linux_parameters,
                 volumes = [batch.CfnJobDefinition.VolumesProperty(
-                    efs_volume_configuration=batch.CfnJobDefinition.EfsVolumeConfigurationProperty(file_system_id=filesystem.file_system_id),
+                    efs_volume_configuration=batch.CfnJobDefinition.EfsVolumeConfigurationProperty(file_system_id=filesystem.file_system_id, root_directory='/sr'),
                     name='efs')],
                 environment= [
                     {

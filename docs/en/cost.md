@@ -1,4 +1,4 @@
-You are responsible for the cost of using Amazon Web Service's services used while running this solution. As of November 2021, in the AWS Oregon Region (us-west-2), for 540p to 4K super resolution tasks, the estimated cost of running the solution to process the original video is approximately $8.86 per hour.
+You are responsible for the cost of using AWS's services used while running this solution. As of September 2022, in the AWS Oregon Region (us-west-2), for 540p to 4K super resolution tasks, the estimated cost of running the solution to process the original video is approximately $8.86 per hour.
 
 ## Formula for cost estimate
 
@@ -14,8 +14,8 @@ Use the following formula for cost estimate:
 
 In AWS Oregon Region (us-west-2), for a 540p (960\*540) video (~200MB), the number of charging seconds corresponding to the original video per second is 960\*540\*25\*3e-6=38.88 seconds. Suppose the video is 30 minutes (1800 seconds) in length, which corresponds to 1800\*38.88=69984 seconds=19.44 hours. So the cost is:
 
-* OnDemand: 19.44 hours\*$0.228 = $4.43
-* Spot: 19.44 hours\*$0.0684 = $1.32
+* OnDemand: 19.44 \*$0.228 = $4.43
+* Spot: 19.44 \*$0.0684 = $1.32
 
 | AWS service | Dimensions | Cost |
 |---|---|---|
@@ -29,8 +29,8 @@ In AWS Oregon Region (us-west-2), for a 540p (960\*540) video (~200MB), the numb
 
 In AWS China (Ningxia) Region operated by NWCD (cn-northwest-1), for a 1080p (1920\*1080) video (~1000MB), the number of charging seconds corresponding to the original video per second is 1920\*1080\*25\*3e-6=155.52 seconds. Suppose the video is 30 minutes (1800 seconds) in length, which corresponds to 1800\*155.52=279936 seconds=77.76 hours. So the cost is:
 
-* OnDemand: 77.76 hours\*¥2.601 = ¥202.25
-* Spot: 77.76 hours\*¥0.4839 = ¥37.62
+* OnDemand: 77.76 \*¥2.601 = ¥202.25
+* Spot: 77.76 \*¥0.4839 = ¥37.62
 
 | AWS service | Dimensions | Cost |
 |---|---|---|

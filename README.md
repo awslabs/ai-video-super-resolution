@@ -12,14 +12,7 @@ The process of reconstructing high-resolution video from low-resolution video is
 
 ## Usage
 
-## CloudFormation(Recommend)
-
-Login to the AWS console and select the link below to launch the AWS cloudformation template.
-
-- [Global](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=SuperResolution&templateURL=https://aws-gcr-solutions.s3.amazonaws.com/Aws-gcr-ai-super-resolution/latest/SuperResolutionStack.template)
-- [China](https://console.amazonaws.cn/cloudformation/home?region=cn-north-1#/stacks/new?stackName=SuperResolution&templateURL=https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/Aws-gcr-ai-super-resolution/latest/SuperResolutionStack.template)
-
-### CDK
+### Prerequisites
 - An AWS account
 - Python installed, such as 3.6
 - Install dependencies of app  
@@ -33,6 +26,8 @@ chmod +x build_layer.sh
 cd ..
 ```
 
+
+#### CDK Synth & CDK Deploy
 ```
 cdk synth -c inferentia=true
 cdk deploy --parameters MaxvCpus=<max cpu>
@@ -57,3 +52,4 @@ MaxvCpus:default: 16
 
 1. Wait for Batch processing..
 1. Download high-resolution video from S3 bucket('superresolutions*')
+

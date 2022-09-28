@@ -3,12 +3,12 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 12
+      nodejs: 14
 
   pre_build:
     commands:
       - pip install -r requirements.txt
-      - pip install cdk-bootstrapless-synthesizer
+      - pip install cdk-bootstrapless-synthesizer==0.7.9
   build:
     commands:
       - cd layers

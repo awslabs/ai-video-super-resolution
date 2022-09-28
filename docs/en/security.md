@@ -2,7 +2,7 @@ When you build systems on AWS infrastructure, security responsibilities are shar
 
 ### IAM roles
 
-AWS Identity and Access Management (IAM) roles allow customers to assign granular access policies and permissions to services and users on the AWS Cloud. This solution creates IAM roles that grant the solution’s access between the solution components.
+AWS Identity and Access Management (IAM) roles allow you to assign granular access policies and permissions to services and users on the AWS Cloud. This solution creates IAM roles that grant the solution’s access between the solution components.
 
 ### Security groups
 

@@ -2,10 +2,7 @@ import ffmpeg
 import boto3
 import os
 import re
-import glob
 import math
-import subprocess
-from urllib.parse import unquote_plus
 from botocore.config import Config
 import json
 
@@ -16,28 +13,25 @@ parallel_groups = int(os.environ['PARALLEL_GROUPS'])
 
 def slice_video(key, segment_time, scale):
     key_store = key.replace('/','#')
-    s3_client.download_file(os.environ['S3_BUCKET'], key, f'{efs_path}/{key_store}')
-
     try:
-        probe = ffmpeg.probe(f'{efs_path}/{key_store}')
+        presigned_url = s3_client.generate_presigned_url('get_object', Params={'Bucket': os.environ['S3_BUCKET'], 'Key': key}, ExpiresIn=1000)
+        probe = ffmpeg.probe(presigned_url)
     except Exception as e:
         print(e.stderr.decode('utf8'))
-    
+        s3_client.download_file(os.environ['S3_BUCKET'], key, f'{efs_path}/{key_store}')
+        probe = ffmpeg.probe(f'{efs_path}/{key_store}')
+        print('finished download video')
+    print('probe video info')
     video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
     if instance_types == 'inf1.xlarge':
         if video_stream['height']*video_stream['width']*scale*scale > 3840*2160:
             return -1
-    
+
     if 'duration' in video_stream:
         duration = video_stream['duration']
     else:
         duration = probe['format']['duration']
     segment_num = math.ceil(float(duration)/int(segment_time))
-    #segment_time = math.ceil(float(duration)/segment_num)
-    #segment_files = glob.glob(os.path.join(efs_path, segment_prefix) + '_seg_[0-9][0-9][0-9]'+ segment_ext)
-    #os.remove(f'{efs_path}/{key}')
-    #for file in segment_files:
-    #    os.remove(file)
     return segment_num
 
 def handler(event, context):
@@ -49,6 +43,7 @@ def handler(event, context):
     task = body.get('task', 'inference')
     scale = str(body.get('scale', '2'))
     env = body.get('env', 'spot')
+    job_name = re.sub(r'[^A-Za-z0-9_-]', '-' , key)
     segment_time = body.get('segment_time', '60')
     if env == 'onDemand':
         env = 'SuperResolution_queue_onDemand'
@@ -57,7 +52,7 @@ def handler(event, context):
     batchClient = boto3.client('batch')
     if task == 'debug':
         response = batchClient.submit_job(
-            jobName=key.replace('#','_').replace('.','_') + "-debug",
+            jobName=job_name + "-debug",
             jobQueue=env,
             jobDefinition='SuperResolution',
             parameters={
@@ -74,9 +69,8 @@ def handler(event, context):
         return {
             "statusCode": 400,
             "body": "Video size exceeded the limit"}
-    print(key_store.replace('#','_').replace('.','_') + "-Split")
     response = batchClient.submit_job(
-        jobName=key_store.replace('#','_').replace('.','_') + "-Split",
+        jobName=job_name + "-Split",
         jobQueue=env,
         jobDefinition='SuperResolution',
         parameters={
@@ -88,7 +82,7 @@ def handler(event, context):
     )
     if video_segments_num<=1:
         response = batchClient.submit_job(
-            jobName=key_store.replace('/','_').replace('.','_') + "-SR",
+            jobName=job_name + "-SR",
             jobQueue=env,
             jobDefinition='SuperResolution',
             dependsOn=[{
@@ -103,7 +97,7 @@ def handler(event, context):
         )
     else:
         response = batchClient.submit_job(
-            jobName=key_store.replace('#','_').replace('.','_') + "-SR",
+            jobName=job_name + "-SR",
             jobQueue=env,
             arrayProperties={
                 'size': video_segments_num
@@ -119,8 +113,11 @@ def handler(event, context):
                 'TaskFlag': 'inference'
             },
         )
+    #return job id for SR job , added by zhuyao
+    SR_Job=response['jobId']
+
     response = batchClient.submit_job(
-        jobName=key_store.replace('#','_').replace('.','_') + "-Merge",
+        jobName=job_name + "-Merge",
         jobQueue=env,
         jobDefinition='SuperResolution',
         dependsOn=list(map(lambda id: {
@@ -136,4 +133,4 @@ def handler(event, context):
     )
     return {
        "statusCode": 200,
-       "body": key + " started"}
+       "body": key + " started, SuperResolution Job Id is: #" + SR_Job +'#'}

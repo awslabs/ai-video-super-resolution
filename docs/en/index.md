@@ -1,4 +1,4 @@
-The AI ​​Video Super Resolution solution is designed to reconstruct high-resolution videos from low-resolution videos through self-developed super resolution algorithms based on deep learning, for example, a 480p video can be converted to a 1080p video. The solution allows customers to efficiently convert mass videos into high resolution and ultra-high resolution videos, so as to make full use of existing video assets. Moreover, customers can use the solution to convert video data in their own accounts.  
+The AI ​​Video Super Resolution solution is designed to reconstruct high-resolution videos from low-resolution videos through self-developed super resolution algorithms based on deep learning, for example, a 480p video can be converted to a 1080p video. The solution allows you to efficiently convert mass videos into high resolution and ultra-high resolution videos, so as to make full use of existing video assets. Moreover, you can use the solution to convert video data in their own accounts.  
 
 The solution mainly includes the following features:
 
