@@ -23,6 +23,7 @@ class SuperResolutionStack(core.Stack):
             self, 'SuperResolutionBucketAccessLog',
             encryption = as3.BucketEncryption.S3_MANAGED,
             removal_policy = core.RemovalPolicy.RETAIN,
+            object_ownership = as3.ObjectOwnership.OBJECT_WRITER,
             server_access_logs_prefix = 'logBucketAccessLog')
 
         s3 = as3.Bucket(
@@ -31,6 +32,7 @@ class SuperResolutionStack(core.Stack):
             server_access_logs_prefix = 'blobstoreBucketAccessLog',
             encryption = as3.BucketEncryption.S3_MANAGED,
             removal_policy = core.RemovalPolicy.RETAIN,
+            object_ownership = as3.ObjectOwnership.OBJECT_WRITER,
             enforce_ssl = True,
         )
 
